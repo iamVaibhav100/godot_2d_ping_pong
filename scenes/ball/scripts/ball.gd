@@ -3,6 +3,7 @@ extends CharacterBody2D
 signal hit_block(block)
 
 @export var bump_timing_scene: PackedScene = preload("res://scenes/effects/bump/bump_timing.tscn")
+@export var bounce_particles_scene: PackedScene = preload("res://scenes/ball/bounce_particles.tscn")
 
 @export var speed: float = 400.0
 @export var accel: float = 20.0
@@ -118,6 +119,7 @@ func _physics_process(delta: float) -> void:
 	else:
 #		print("HIT OTHER: ", Globals.stats["ball_bounces"])
 		velocity = velocity.bounce(normal)
+		spawn_bounce_particles(collision.get_position(), normal)
 	
 	velocity = velocity.limit_length(max_speed)
 	
@@ -132,6 +134,13 @@ func scale_based_on_velocity() -> void:
 	if animation_player.is_playing(): return
 	sprite.scale = lerp(sprite_base_scale, sprite_base_scale * Vector2(1.4, 0.5), velocity.length()/max_speed)
 	sprite.rotation = velocity.angle()
+	
+func spawn_bounce_particles(pos: Vector2, normal: Vector2) -> void:
+	var instance = bounce_particles_scene.instantiate()
+	get_tree().get_current_scene().add_child(instance)
+	instance.global_position = pos
+	instance.rotation = normal.angle()
+	
 		
 func attract(global_position) -> void:
 	attracted = true
